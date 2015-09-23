@@ -1,4 +1,4 @@
-##!/usr/bin/env python3
+#!/usr/bin/env python3
 '''
 Database layout:
 
@@ -6,21 +6,24 @@ Database layout:
         `url` TEXT NOT NULL,
         `hashes` BLOB NULL
     )
+
+Usage:
+
+1.  Add `@daily ~/sms-notifier.py` to your crontab.
+    Customize to your needs.
 '''
-import hashlib, json, requests, smtplib, sqlite3, time
+import hashlib, json, smtplib, sqlite3, time
+import anyconfig, requests
 from email.mime.text import MIMEText
 
 # Configuration
-from_addr = 'Skynet Messaging System <sms@example.com>'
-to_addr   = 'Yours Truly <yours.truly@example.com>'
-msg_subject = 'Page {0[tag]} has changed'
-msg_body  = "Hey!\n\nI'm just letting you know that the {0[tag]} page\
-has changed recently.\nYou can view the latest version here: \
-{0[url]}\n\nYours,\nS.M.S."
-watched_pages = [
-    { 'url': 'https://github.com', 'tag': 'GitHub' }
-]
-hash_algos = ['md5', 'sha256']
+config        = anyconfig.load('sms-config.json')
+from_addr     = config['from']
+to_addr       = config['to']
+msg_subject   = config['subject']
+msg_body      = config['body']
+watched_pages = config['pages']
+hash_algos    = config['hash_algos']
 
 def fetch_page(url):
     r = requests.get(url)
