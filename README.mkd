@@ -1,0 +1,33 @@
+This is a silly little utility written from urgent need thereof. For some reason,
+I figured it would be faster to reinvent the wheel than to search for an existing,
+robust solution.
+
+## Installation
+
+Written for and tested with Python 3.2 and later. Usage of `virtualenv` is advised
+for convenience.
+
+```sh
+$ pip install -r requirements.txt
+$ python setup.py # Create the database
+```
+
+## Usage
+
+For regular updates, add `@daily ~/sms/notifier.py` to your crontab.
+
+```sh
+$ echo '@daily python3 $HOME/sms/notifier.py' | crontab
+```
+
+A separate execution script might be necessary if you're using `virtualenv`. See
+`runner.hs` for an example
+
+```sh
+@daily $HOME/sms/runner.sh
+```
+
+## Copyright
+
+MIT-licensed.
+

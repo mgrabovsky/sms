@@ -1,17 +1,4 @@
 #!/usr/bin/env python3
-'''
-Database layout:
-
-    CREATE TABLE IF NOT EXISTS `sms_hashes` (
-        `url` TEXT NOT NULL,
-        `hashes` BLOB NULL
-    )
-
-Usage:
-
-1.  Add `@daily ~/sms-notifier.py` to your crontab.
-    Customize to your needs.
-'''
 import hashlib, json, smtplib, sqlite3, time
 import anyconfig, requests
 from email.mime.text import MIMEText
