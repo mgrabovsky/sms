@@ -4,7 +4,7 @@ import anyconfig, requests
 from email.mime.text import MIMEText
 
 # Configuration
-config        = anyconfig.load('sms-config.json')
+config        = anyconfig.load('config.json')
 from_addr     = config['from']
 to_addr       = config['to']
 msg_subject   = config['subject']
