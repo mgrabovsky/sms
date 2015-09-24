@@ -59,6 +59,7 @@ if __name__ == '__main__':
     db = sqlite3.connect('sms.db')
 
     for page in watched_pages:
+        print('Downloading {} ...'.format(page['url']))
         contents = fetch_page(page['url'])
         new_hashes = generate_hashes(hash_algos, contents)
 
@@ -69,16 +70,17 @@ if __name__ == '__main__':
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
-            print('New page')
+            print('    New page, saving...')
             cur.execute('INSERT INTO `sms_hashes` (`url`, `hashes`) VALUES(?, ?)',
                     (page['url'], json.dumps(new_hashes)))
             db.commit()
+            print('    Done')
             continue
 
         # Check if the page has changed
         old_hashes = json.loads(res[0])
         if check_hashes(old_hashes, contents):
-            print('Page hasn\'t changed')
+            print('    Page unmodified, done')
             continue
 
         # Update the database first
@@ -86,12 +88,13 @@ if __name__ == '__main__':
                 (json.dumps(new_hashes), page['url']))
         db.commit()
 
+        print('    Page modified, sending email...')
         # Send the message
         subject = msg_subject.format(page)
         body    = msg_body.format(page)
         send_mail(from_addr, to_addr, subject, body)
-        print('Sent email')
 
+        print('    Done')
         time.sleep(0.5)
 
     db.close()
