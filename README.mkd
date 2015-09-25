@@ -27,6 +27,13 @@ A separate execution script might be necessary if you're using `virtualenv`. See
 @daily $HOME/sms/runner.sh
 ```
 
+## To-do list of features
+
+[ ] diffs
+[ ] proper error handling and recovery
+[ ] proper logging
+[ ] parallelism
+
 ## Copyright
 
 MIT-licensed.
