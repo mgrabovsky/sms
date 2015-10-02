@@ -2,6 +2,10 @@ This is a silly little utility written from urgent need thereof. For some reason
 I figured it would be faster to reinvent the wheel than to search for an existing,
 robust solution.
 
+## Requirements
+
+-   Python 3
+
 ## Installation
 
 Written for and tested with Python 3.2 and later. Usage of `virtualenv` is advised
