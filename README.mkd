@@ -37,6 +37,7 @@ A separate execution script might be necessary if you're using `virtualenv`. See
 - [ ] proper error handling and recovery
 - [ ] proper logging
 - [ ] parallelism
+- [ ] templating (jinja2?)
 
 ## Copyright
 
