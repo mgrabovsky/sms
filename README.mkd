@@ -38,6 +38,7 @@ A separate execution script might be necessary if you're using `virtualenv`. See
 - [ ] proper logging
 - [ ] parallelism
 - [ ] templating (jinja2?)
+- [ ] aggregated mailing
 
 ## Copyright
 
