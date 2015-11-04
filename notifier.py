@@ -91,7 +91,7 @@ if __name__ == '__main__':
         subject  = msg_subject.format(page)
         body     = msg_body.format(page)
         body    += '\n\n'
-        oldlines = res[1].splitlines()
+        oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
         # FIXME: There's gotta be a better way
         body    += '\n'.join([l for l in diff_strings(oldlines, newlines)])
