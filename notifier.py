@@ -2,6 +2,7 @@
 import argparse, hashlib, json, smtplib, sqlite3, time
 import anyconfig, requests
 from email.mime.text import MIMEText
+from diff import diff_strings
 
 # Configuration
 config        = anyconfig.load('config.json')
@@ -61,15 +62,15 @@ if __name__ == '__main__':
         new_hashes = generate_hashes(hash_algos, contents)
 
         cur = db.cursor()
-        cur.execute('SELECT `hashes` FROM `sms_hashes` WHERE `url`=?',
+        cur.execute('SELECT `hashes`, `old_text` FROM `sms_hashes` WHERE `url`=?',
                 (page['url'],))
         res = cur.fetchone()
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
             debug('    New page, saving...')
-            cur.execute('INSERT INTO `sms_hashes` (`url`, `hashes`) VALUES(?, ?)',
-                    (page['url'], json.dumps(new_hashes)))
+            cur.execute('INSERT INTO `sms_hashes` (`url`, `hashes`, `old_text`) VALUES(?, ?, ?)',
+                    (page['url'], json.dumps(new_hashes), contents))
             db.commit()
             debug('    Done')
             continue
@@ -81,14 +82,19 @@ if __name__ == '__main__':
             continue
 
         # Update the database first
-        cur.execute('UPDATE `sms_hashes` SET `hashes`=? WHERE `url`=?',
-                (json.dumps(new_hashes), page['url']))
+        cur.execute('UPDATE `sms_hashes` SET `hashes`=?, `old_text`=? WHERE `url`=?',
+                (json.dumps(new_hashes), contents, page['url']))
         db.commit()
 
         debug('    Page modified, sending email...')
-        # Send the message
-        subject = msg_subject.format(page)
-        body    = msg_body.format(page)
+        # Compile and send the message
+        subject  = msg_subject.format(page)
+        body     = msg_body.format(page)
+        body    += '\n\n'
+        oldlines = res[1].splitlines()
+        newlines = contents.splitlines()
+        # FIXME: There's gotta be a better way
+        body    += '\n'.join([l for l in diff_strings(oldlines, newlines)])
         send_mail(from_addr, to_addr, subject, body)
 
         debug('    Done')

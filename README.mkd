@@ -33,7 +33,7 @@ A separate execution script might be necessary if you're using `virtualenv`. See
 
 ## To-do list of features
 
-- [ ] diffs
+- [x] diffs
 - [ ] proper error handling and recovery
 - [ ] proper logging
 - [ ] parallelism
