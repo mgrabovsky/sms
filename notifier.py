@@ -38,9 +38,10 @@ def send_mail(from_addr, to_addr, subject, body):
     msg['Subject'] = subject
     msg['From']    = from_addr
     msg['To']      = to_addr
+    msg.set_charset('utf-8')
 
     smtp = smtplib.SMTP('localhost')
-    smtp.sendmail(msg['From'], [msg['To']], msg.as_string())
+    smtp.send_message(msg)
     smtp.quit()
 
 if __name__ == '__main__':
