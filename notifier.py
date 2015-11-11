@@ -2,6 +2,7 @@
 import argparse, hashlib, json, smtplib, sqlite3, time
 import anyconfig, requests
 from email.mime.text import MIMEText
+from email.header import Header
 from diff import diff_strings
 
 # Configuration
@@ -34,8 +35,8 @@ def check_hashes(hashes, blob):
     return True
 
 def send_mail(from_addr, to_addr, subject, body):
-    msg            = MIMEText(body)
-    msg['Subject'] = subject
+    msg            = MIMEText(body.encode('utf-8'), _charset='utf-8')
+    msg['Subject'] = Header(subject, 'utf-8')
     msg['From']    = from_addr
     msg['To']      = to_addr
     msg.set_charset('utf-8')
