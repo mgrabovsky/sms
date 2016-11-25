@@ -7,7 +7,10 @@
 		{
 			"url": "https://github.com",
 			"tag": "GitHub"
+		},
+		{
+			"url": "https://news.ycombinator.com/",
+			"tag": "Hacker News"
 		}
-	],
-	"hash_algos": ["md5", "sha256"]
+	]
 }

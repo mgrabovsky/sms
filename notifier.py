@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, hashlib, json, smtplib, sqlite3, time
+import argparse, hashlib, smtplib, sqlite3, time
 import anyconfig, requests
 from email.mime.text import MIMEText
 from email.header import Header
@@ -12,27 +12,18 @@ to_addr       = config['to']
 msg_subject   = config['subject']
 msg_body      = config['body']
 watched_pages = config['pages']
-hash_algos    = config['hash_algos']
 
 def fetch_page(url):
     r = requests.get(url)
     return r.text
 
-def generate_hashes(hash_algos, blob):
-    hashes = {}
-    for algo in hash_algos:
-        h = hashlib.new(algo)
-        h.update(blob.encode('utf8'))
-        hashes[algo] = h.hexdigest()
-    return hashes
+def generate_hash(blob):
+    h = hashlib.new('sha256')
+    h.update(blob.encode('utf8'))
+    return h.hexdigest()
 
-def check_hashes(hashes, blob):
-    for algo, digest in hashes.items():
-        h = hashlib.new(algo)
-        h.update(blob.encode('utf8'))
-        if h.hexdigest() != digest:
-            return False
-    return True
+def check_hash(hash, blob):
+    return hash == generate_hash(blob)
 
 def send_mail(from_addr, to_addr, subject, body):
     msg            = MIMEText(body.encode('utf-8'), _charset='utf-8')
@@ -61,42 +52,41 @@ if __name__ == '__main__':
     for page in watched_pages:
         debug('Downloading {} ...'.format(page['url']))
         contents = fetch_page(page['url'])
-        new_hashes = generate_hashes(hash_algos, contents)
+        new_hash = generate_hash(contents)
 
         cur = db.cursor()
-        cur.execute('SELECT `hashes`, `old_text` FROM `sms_hashes` WHERE `url`=?',
+        cur.execute('SELECT `hash`, `old_text` FROM `sms_hashes` WHERE `url`=?',
                 (page['url'],))
         res = cur.fetchone()
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
             debug('    New page, saving...')
-            cur.execute('INSERT INTO `sms_hashes` (`url`, `hashes`, `old_text`) VALUES(?, ?, ?)',
-                    (page['url'], json.dumps(new_hashes), contents))
+            cur.execute('INSERT INTO `sms_hashes` (`url`, `hash`, `old_text`) VALUES(?, ?, ?)',
+                    (page['url'], new_hash, contents))
             db.commit()
             debug('    Done')
             continue
 
         # Check if the page has changed
-        old_hashes = json.loads(res[0])
-        if check_hashes(old_hashes, contents):
-            debug('    Page unmodified, done')
+        old_hash = res[0]
+        if check_hash(old_hash, contents):
+            debug('    Page not modified, done')
             continue
 
         # Update the database first
-        cur.execute('UPDATE `sms_hashes` SET `hashes`=?, `old_text`=? WHERE `url`=?',
-                (json.dumps(new_hashes), contents, page['url']))
+        cur.execute('UPDATE `sms_hashes` SET `hash`=?, `old_text`=? WHERE `url`=?',
+                (new_hash, contents, page['url']))
         db.commit()
 
-        debug('    Page modified, sending email...')
         # Compile and send the message
+        debug('    Page modified, sending email...')
         subject  = msg_subject.format(page)
         body     = msg_body.format(page)
         body    += '\n\n'
         oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
-        # FIXME: There's gotta be a better way
-        body    += '\n'.join([l for l in diff_strings(oldlines, newlines)])
+        body    += '\n'.join(diff_strings(oldlines, newlines))
         send_mail(from_addr, to_addr, subject, body)
 
         debug('    Done')
