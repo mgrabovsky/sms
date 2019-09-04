@@ -49,16 +49,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
-    # Optional diagnostic output to console
-    if args.verbose:
-        def debug(msg): print(msg)
-    else:
-        def debug(_): pass
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 
     db = sqlite3.connect('sms.db')
 
     for page in watched_pages:
-        debug('Downloading {} ...'.format(page['url']))
+        logger.info('Downloading {} ...'.format(page['url']))
         contents = fetch_page(page['url'])
         new_hash = generate_hash(contents)
 
@@ -69,17 +67,17 @@ if __name__ == '__main__':
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
-            debug('    New page, saving...')
+            logger.debug('    New page, saving...')
             cur.execute('INSERT INTO `sms_hashes` (`url`, `hash`, `old_text`) VALUES(?, ?, ?)',
                     (page['url'], new_hash, contents))
             db.commit()
-            debug('    Done')
+            logger.debug('    Done')
             continue
 
         # Check if the page has changed
         old_hash = res[0]
         if check_hash(old_hash, contents):
-            debug('    Page not modified, done')
+            logger.debug('    Page not modified, done')
             continue
 
         # Update the database first
@@ -88,7 +86,7 @@ if __name__ == '__main__':
         db.commit()
 
         # Compile and send the message
-        debug('    Page modified, sending email...')
+        logger.debug('    Page modified, sending email...')
         subject  = msg_subject.format(page)
         body     = msg_body.format(page)
         body    += '\n\n'
@@ -97,7 +95,7 @@ if __name__ == '__main__':
         body    += '\n'.join(diff_strings(oldlines, newlines))
         send_mail(from_addr, to_addr, subject, body)
 
-        debug('    Done')
+        logger.debug('    Done')
         time.sleep(0.5)
 
     db.close()
