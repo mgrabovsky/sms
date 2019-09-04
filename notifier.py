@@ -21,20 +21,20 @@ msg_subject   = config['subject']
 msg_body      = config['body']
 watched_pages = config['pages']
 
-def fetch_page(url):
+def fetch_page(url: str) -> str:
     r = requests.get(url)
     return r.text
 
-def generate_hash(blob):
+def generate_hash(blob: str) -> str:
     h = hashlib.new('sha256')
     h.update(blob.encode('utf8'))
     return h.hexdigest()
 
-def check_hash(hash, blob):
+def check_hash(hash: str, blob: str) -> bool:
     return hash == generate_hash(blob)
 
-def send_mail(from_addr, to_addr, subject, body):
-    msg            = MIMEText(body.encode('utf-8'), _charset='utf-8')
+def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
+    msg            = MIMEText(body, _charset='utf-8')
     msg['Subject'] = Header(subject, 'utf-8')
     msg['From']    = from_addr
     msg['To']      = to_addr
