@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-import argparse, hashlib, smtplib, sqlite3, time
-import anyconfig, requests
+import argparse
 from email.mime.text import MIMEText
 from email.header import Header
+import hashlib
+import logging
+import smtplib
+import sqlite3
+import time
+
+import anyconfig
+import requests
+
 from diff import diff_strings
 
 # Configuration
