@@ -3,23 +3,15 @@ import argparse
 from email.mime.text import MIMEText
 from email.header import Header
 import hashlib
+import json
 import logging
 import smtplib
 import sqlite3
 import time
 
-import anyconfig
 import requests
 
 from diff import diff_strings
-
-# Configuration
-config        = anyconfig.load('config.json')
-from_addr     = config['from']
-to_addr       = config['to']
-msg_subject   = config['subject']
-msg_body      = config['body']
-watched_pages = config['pages']
 
 def fetch_page(url: str) -> str:
     r = requests.get(url)
@@ -45,6 +37,16 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     smtp.quit()
 
 if __name__ == '__main__':
+    # Load user configuration
+    # FIXME: Graceful error handling
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+    from_addr     = config['from']
+    to_addr       = config['to']
+    msg_subject   = config['subject']
+    msg_body      = config['body']
+    watched_pages = config['pages']
+
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true')
@@ -57,6 +59,7 @@ if __name__ == '__main__':
 
     for page in watched_pages:
         logger.info('Downloading {} ...'.format(page['url']))
+        # FIXME: Handle errors gracefully
         contents = fetch_page(page['url'])
         new_hash = generate_hash(contents)
 
