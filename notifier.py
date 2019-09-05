@@ -68,17 +68,17 @@ if __name__ == '__main__':
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
-            logger.debug('    New page, saving...')
+            logger.debug('\tNew page, saving...')
             cur.execute('INSERT INTO `sms_hashes` (`url`, `hash`, `old_text`) VALUES(?, ?, ?)',
                     (page['url'], new_hash, contents))
             db.commit()
-            logger.debug('    Done')
+            logger.debug('\tDone')
             continue
 
         # Check if the page has changed
         old_hash = res[0]
         if check_hash(old_hash, contents):
-            logger.debug('    Page not modified, done')
+            logger.debug('\tPage not modified, done')
             continue
 
         # Update the database first
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         db.commit()
 
         # Compile and send the message
-        logger.debug('    Page modified, sending email...')
+        logger.debug('\tPage modified, sending email...')
         subject  = msg_subject.format(page)
         body     = msg_body.format(page)
         body    += '\n\n'
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         body    += '\n'.join(diff_strings(oldlines, newlines))
         send_mail(from_addr, to_addr, subject, body)
 
-        logger.debug('    Done')
+        logger.debug('\tDone')
         time.sleep(0.5)
 
     db.close()
