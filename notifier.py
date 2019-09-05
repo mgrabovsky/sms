@@ -8,21 +8,19 @@ import logging
 import smtplib
 import sqlite3
 import time
-
-import requests
+import urllib.request
 
 from diff import diff_strings
 
-def fetch_page(url: str) -> str:
-    r = requests.get(url)
-    return r.text
+def fetch_page(url: str) -> bytes:
+    return urllib.request.urlopen(url).read()
 
-def generate_hash(blob: str) -> str:
+def generate_hash(blob: bytes) -> str:
     h = hashlib.new('sha256')
-    h.update(blob.encode('utf8'))
+    h.update(blob)
     return h.hexdigest()
 
-def check_hash(hash: str, blob: str) -> bool:
+def check_hash(hash: str, blob: bytes) -> bool:
     return hash == generate_hash(blob)
 
 def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
