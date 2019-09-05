@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 import argparse
+import difflib
 from email.mime.text import MIMEText
 from email.header import Header
 import hashlib
 import json
 import logging
-import smtplib
+from smtplib import SMTP
 import sqlite3
 import time
+from typing import Any, Dict, Iterator, List
 import urllib.request
 
-from diff import diff_strings
+def check_hash(hash: str, blob: bytes) -> bool:
+    return hash == generate_hash(blob)
+
+def diff_bytes(old: List[bytes], new: List[bytes]) -> Iterator[bytes]:
+    return difflib.diff_bytes(difflib.unified_diff, old, new, b'before', b'after')
 
 def fetch_page(url: str) -> bytes:
     return urllib.request.urlopen(url).read()
@@ -20,8 +26,11 @@ def generate_hash(blob: bytes) -> str:
     h.update(blob)
     return h.hexdigest()
 
-def check_hash(hash: str, blob: bytes) -> bool:
-    return hash == generate_hash(blob)
+def load_configuration(config_file: str) -> Dict[str, Any]:
+    with open(config_file, 'r') as f:
+        config = json.load(f)
+
+    return config
 
 def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     msg            = MIMEText(body, _charset='utf-8')
@@ -30,15 +39,14 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     msg['To']      = to_addr
     msg.set_charset('utf-8')
 
-    smtp = smtplib.SMTP('localhost')
+    smtp = SMTP('localhost')
     smtp.send_message(msg)
     smtp.quit()
 
 if __name__ == '__main__':
     # Load user configuration
     # FIXME: Graceful error handling
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    config        = load_configuration('config.json')
     from_addr     = config['from']
     to_addr       = config['to']
     msg_subject   = config['subject']
@@ -93,7 +101,7 @@ if __name__ == '__main__':
         body    += '\n\n'
         oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
-        body    += '\n'.join(diff_strings(oldlines, newlines))
+        body    += b'\n'.join(diff_bytes(oldlines, newlines)).decode('utf8')
         send_mail(from_addr, to_addr, subject, body)
 
         logger.debug('\tDone')
