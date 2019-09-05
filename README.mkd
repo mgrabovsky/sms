@@ -6,13 +6,11 @@ robust solution.
 
 -   Python 3
 
-## Installation
+## Set up
 
-Written for and tested with Python 3.2 and later. Usage of `virtualenv` is advised
-for convenience.
+Written for and tested with Python 3.7 and later.
 
 ```sh
-$ pip install -r requirements.txt
 $ python setup.py # Create the database
 ```
 
