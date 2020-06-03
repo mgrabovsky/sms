@@ -1,16 +1,16 @@
 {
 	"from": "Skynet Messaging System <sms@example.com>",
 	"to": "Yours Truly <yours.truly@example.com>",
-	"subject": "Page {0[tag]} has changed",
-	"body": "Hey!\n\nI'm just letting you know that the {0[tag]} page has changed recently.\nYou can view the latest version here: {0[url]}\n\nYours,\nS.M.S.",
+	"subject": "Page {0[label]} has changed",
+	"body": "Hey!\n\nI'm just letting you know that the {0[label]} page has changed recently.\nYou can view the latest version here: {0[url]}\n\nYours,\nS.M.S.",
 	"pages": [
 		{
-			"url": "https://github.com",
-			"tag": "GitHub"
+			"label": "GitHub",
+			"url": "https://github.com"
 		},
 		{
-			"url": "https://news.ycombinator.com/",
-			"tag": "Hacker News"
+			"label": "Hacker News",
+			"url": "https://news.ycombinator.com/"
 		}
 	]
 }

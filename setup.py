@@ -5,7 +5,7 @@ if __name__ == '__main__':
     cur = db.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS `sms_hashes` (
         `url` TEXT NOT NULL,
-        `hashes` BLOB NULL,
+        `hash` BLOB NULL,
         `old_text` BLOB NULL
     )''')
     db.commit()
