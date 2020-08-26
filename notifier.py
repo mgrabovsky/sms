@@ -11,6 +11,7 @@ import sqlite3
 import sys
 import time
 from typing import Any, Iterator, List
+from urllib.error import URLError
 import urllib.request
 
 
@@ -57,7 +58,6 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
 
 def main():
     # Load user configuration
-    # FIXME: Graceful error handling
     config = load_configuration('config.json')
     if config is None:
         print('Error: Could not load config file', file=sys.stderr)
@@ -90,8 +90,12 @@ def main():
 
     for page in watched_pages:
         logger.info('Downloading %s ...', page['url'])
-        # FIXME: Handle errors gracefully
-        contents = fetch_page(page['url'])
+        try:
+            contents = fetch_page(page['url'])
+        except URLError as exc:
+            logger.error('HTTP error occurred: %s', exc)
+            continue
+
         new_hash = generate_hash(contents)
 
         cur = db.cursor()
