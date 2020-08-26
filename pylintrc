@@ -1,0 +1,5 @@
+[BASIC]
+variable-naming-style = any
+
+[MESSAGE CONTROL]
+disable = bad-whitespace, duplicate-code
