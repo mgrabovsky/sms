@@ -1,4 +1,4 @@
-name: Check code style
+name: Check code
 on:
   push:
     branches: [ master ]
