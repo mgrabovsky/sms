@@ -44,6 +44,26 @@ def load_configuration(config_file: str) -> Any:
     return config
 
 
+def notify(config: Dict[str, Any],
+           page: Dict[str, str],
+           diff: Iterator[bytes]) -> None:
+    '''
+    Trigger a notification that the given page has changed, including
+    the specified diff between versions.
+    '''
+    from_addr     = config['from']
+    to_addr       = config['to']
+    msg_subject   = config['subject']
+    msg_body      = config['body']
+
+    subject  = msg_subject.format(page)
+    body     = msg_body.format(page)
+    body    += '\n\n'
+    body    += b'\n'.join(diff).decode('utf8')
+
+    send_mail(from_addr, to_addr, subject, body)
+
+
 def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     msg            = MIMEText(body, _charset='utf-8')
     msg['Subject'] = Header(subject, 'utf-8')
@@ -68,10 +88,6 @@ def main():
               file=sys.stderr)
         sys.exit(1)
 
-    from_addr     = config['from']
-    to_addr       = config['to']
-    msg_subject   = config['subject']
-    msg_body      = config['body']
     watched_pages = config['pages']
 
     # Parse command line arguments
@@ -127,17 +143,11 @@ def main():
         db.commit()
 
         # Compile and send the message
-        logger.debug('Page modified, sending email...')
-        subject  = msg_subject.format(page)
-        body     = msg_body.format(page)
-        body    += '\n\n'
         oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
 
-        body_lines = diff_bytes(oldlines, newlines)
-        body      += b'\n'.join(body_lines).decode('utf8')
-
-        send_mail(from_addr, to_addr, subject, body)
+        logger.debug('Page modified, sending email...')
+        notify(config, page, diff_bytes(oldlines, newlines))
 
         logger.debug('Done')
         time.sleep(0.5)
