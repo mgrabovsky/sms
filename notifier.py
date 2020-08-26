@@ -16,25 +16,41 @@ import urllib.request
 
 
 def is_modified(blob: bytes, checksum: str) -> bool:
+    '''
+    Compare a byte string to a hash to check if it was modified since
+    the hash was generated.
+    '''
     return generate_hash(blob) == checksum
 
 
 def diff_bytes(old: List[bytes], new: List[bytes]) -> Iterator[bytes]:
+    '''
+    Create a diff of two byte strings.
+    '''
     return difflib.diff_bytes(difflib.unified_diff, old, new, b'before',
                               b'after')
 
 
 def fetch_page(url: str) -> bytes:
+    '''
+    Download webpage from the specified URL.
+    '''
     return urllib.request.urlopen(url).read()
 
 
 def generate_hash(blob: bytes) -> str:
+    '''
+    Generate the SHA-1 hash of a byte string.
+    '''
     h = hashlib.new('sha1')
     h.update(blob)
     return h.hexdigest()
 
 
 def load_configuration(config_file: str) -> Any:
+    '''
+    Load configuration settings from the given file.
+    '''
     try:
         with open(config_file, 'r') as f:
             config = json.load(f)
@@ -65,6 +81,10 @@ def notify(config: Dict[str, Any],
 
 
 def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
+    '''
+    Send an email message with the specified parameters via the STMP
+    server at localhost.
+    '''
     msg            = MIMEText(body, _charset='utf-8')
     msg['Subject'] = Header(subject, 'utf-8')
     msg['From']    = from_addr
@@ -77,6 +97,11 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
 
 
 def main():
+    '''
+    Main script entry point. Loads configuration from config.json in the
+    current directory, checks the specified pages one by one and sends
+    email notification for pages that have changes since the last check.
+    '''
     # Load user configuration
     config = load_configuration('config.json')
     if config is None:
