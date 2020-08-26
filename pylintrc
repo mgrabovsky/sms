@@ -2,4 +2,4 @@
 variable-naming-style = any
 
 [MESSAGE CONTROL]
-disable = bad-whitespace, duplicate-code
+disable = bad-whitespace, duplicate-code, missing-module-docstring
