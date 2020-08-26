@@ -133,7 +133,7 @@ def main():
         body_lines = diff_bytes(oldlines, newlines)
         body      += b'\n'.join(body_lines).decode('utf8')
 
-        #send_mail(from_addr, to_addr, subject, body)
+        send_mail(from_addr, to_addr, subject, body)
 
         logger.debug('Done')
         time.sleep(0.5)
