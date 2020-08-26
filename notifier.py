@@ -13,19 +13,25 @@ import time
 from typing import Any, Iterator, List
 import urllib.request
 
+
 def is_modified(blob: bytes, checksum: str) -> bool:
     return generate_hash(blob) == checksum
 
+
 def diff_bytes(old: List[bytes], new: List[bytes]) -> Iterator[bytes]:
-    return difflib.diff_bytes(difflib.unified_diff, old, new, b'before', b'after')
+    return difflib.diff_bytes(difflib.unified_diff, old, new, b'before',
+                              b'after')
+
 
 def fetch_page(url: str) -> bytes:
     return urllib.request.urlopen(url).read()
+
 
 def generate_hash(blob: bytes) -> str:
     h = hashlib.new('sha1')
     h.update(blob)
     return h.hexdigest()
+
 
 def load_configuration(config_file: str) -> Any:
     try:
@@ -35,6 +41,7 @@ def load_configuration(config_file: str) -> Any:
         return None
 
     return config
+
 
 def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     msg            = MIMEText(body, _charset='utf-8')
@@ -47,6 +54,7 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     smtp.send_message(msg)
     smtp.quit()
 
+
 def main():
     # Load user configuration
     # FIXME: Graceful error handling
@@ -55,7 +63,8 @@ def main():
         print('Error: Could not load config file', file=sys.stderr)
         sys.exit(1)
     if not isinstance(config, dict):
-        print('Error: Config file is not valid. The top-level structure must be a dictionary',
+        print('Error: Config file is not valid. The top-level structure'
+              'must be a dictionary',
               file=sys.stderr)
         sys.exit(1)
 
@@ -86,14 +95,16 @@ def main():
         new_hash = generate_hash(contents)
 
         cur = db.cursor()
-        cur.execute('SELECT `hash`, `old_text` FROM `sms_hashes` WHERE `url`=?',
+        cur.execute('SELECT `hash`, `old_text` FROM `sms_hashes` WHERE '
+                    '`url`=?',
                     (page['url'],))
         res = cur.fetchone()
 
         # Create a record for the page if it hasn't been scraped yet
         if not res or not res[0]:
             logger.debug('New page, saving...')
-            cur.execute('INSERT INTO `sms_hashes` (`url`, `hash`, `old_text`) VALUES(?, ?, ?)',
+            cur.execute('INSERT INTO `sms_hashes` (`url`, `hash`, '
+                        '`old_text`) VALUES(?, ?, ?)',
                         (page['url'], new_hash, contents))
             db.commit()
             logger.debug('Done')
@@ -106,7 +117,8 @@ def main():
             continue
 
         # Update the database first
-        cur.execute('UPDATE `sms_hashes` SET `hash`=?, `old_text`=? WHERE `url`=?',
+        cur.execute('UPDATE `sms_hashes` SET `hash`=?, `old_text`=? '
+                    'WHERE `url`=?',
                     (new_hash, contents, page['url']))
         db.commit()
 
@@ -117,13 +129,17 @@ def main():
         body    += '\n\n'
         oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
-        body    += b'\n'.join(diff_bytes(oldlines, newlines)).decode('utf8')
+
+        body_lines = diff_bytes(oldlines, newlines)
+        body      += b'\n'.join(body_lines).decode('utf8')
+
         #send_mail(from_addr, to_addr, subject, body)
 
         logger.debug('Done')
         time.sleep(0.5)
 
     db.close()
+
 
 if __name__ == '__main__':
     main()
