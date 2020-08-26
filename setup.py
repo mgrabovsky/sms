@@ -1,6 +1,7 @@
 import sqlite3
 
-if __name__ == '__main__':
+
+def main():
     db = sqlite3.connect('sms.db')
     cur = db.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS `sms_hashes` (
@@ -10,3 +11,9 @@ if __name__ == '__main__':
     )''')
     db.commit()
     db.close()
+
+
+if __name__ == '__main__':
+    main()
+else:
+    raise NotImplementedError
