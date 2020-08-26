@@ -10,7 +10,7 @@ from smtplib import SMTP
 import sqlite3
 import sys
 import time
-from typing import Any, Iterator, List
+from typing import Any, Dict, Iterator, List, Optional
 from urllib.error import URLError
 import urllib.request
 
@@ -47,7 +47,7 @@ def generate_hash(blob: bytes) -> str:
     return h.hexdigest()
 
 
-def load_configuration(config_file: str) -> Any:
+def load_configuration(config_file: str) -> Optional[Dict[str, Any]]:
     '''
     Load configuration settings from the given file.
     '''
