@@ -1,0 +1,12 @@
+[Unit]
+Description=Run sms watchdog script every day
+Wants=sms-notifier.service
+
+[Timer]
+Unit=sms-notifier.service
+OnCalendar=*-*-* 14:00:00
+#RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run sms watchdog and trigger notifications
+# Wants=sms-notifier.timer
+
+[Service]
+ExecStart=/usr/bin/python3 /home/anonymous/code/doodles/sms/notifier.py -v
+WorkingDirectory=/home/anonymous/code/doodles/sms
+
+[Install]
+WantedBy=multi-user.target
