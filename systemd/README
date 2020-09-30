@@ -1,0 +1,12 @@
+Put the two files (`sms-notifier.service` and `sms-notifier.timer`) into
+`~/.config/systemd/user/` and run the following commands:
+
+    $ systemctl --user enable --now sms-notifier.timer
+
+You can manually trigger the notifier using
+
+    $ systemctl --user start sms-notifier.service
+
+To inspect the logs, use
+
+    $ journalctl --user-unit sms-notifier.service
