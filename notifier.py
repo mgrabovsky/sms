@@ -52,7 +52,7 @@ def load_configuration(config_file: str) -> Optional[Dict[str, Any]]:
     Load configuration settings from the given file.
     '''
     try:
-        with open(config_file, 'r') as f:
+        with open(config_file, encoding='utf-8') as f:
             config = json.load(f)
     except OSError:
         return None
