@@ -96,7 +96,7 @@ def send_mail(from_addr: str, to_addr: str, subject: str, body: str) -> None:
     smtp.quit()
 
 
-def main():
+def main() -> None:
     '''
     Main script entry point. Loads configuration from config.json in the
     current directory, checks the specified pages one by one and sends
@@ -183,5 +183,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-else:
-    raise NotImplementedError
