@@ -13,7 +13,7 @@ robust solution.
 Written for and tested with Python 3.7 and later.
 
 ```sh
-$ python setup.py # Create the database
+$ python scripts/create_db.py
 ```
 
 ## Usage
