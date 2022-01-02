@@ -152,13 +152,13 @@ def main():
                         '`old_text`) VALUES(?, ?, ?)',
                         (page['url'], new_hash, contents))
             db.commit()
-            logger.debug('Done')
+            logger.debug('Page saved')
             continue
 
         # Check if the page has changed
         old_hash = res[0]
         if is_modified(contents, old_hash):
-            logger.debug('Page not modified, done')
+            logger.info('Page not modified')
             continue
 
         # Update the database first
@@ -171,13 +171,14 @@ def main():
         oldlines = '' if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
 
-        logger.debug('Page modified, sending email...')
-        notify(config, page, diff_bytes(oldlines, newlines))
+        logger.debug('Page modified, sending notification...')
+        notify(diff_bytes(oldlines, newlines), page, logger)
 
-        logger.debug('Done')
+        logger.debug('Notification sent')
         time.sleep(0.5)
 
     db.close()
+    logger.info('All pages checked')
 
 
 if __name__ == '__main__':
