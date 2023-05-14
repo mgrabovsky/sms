@@ -62,7 +62,7 @@ def main() -> None:
 
         cur = db.cursor()
         cur.execute(
-            "SELECT `hash`, `old_text` FROM `sms_hashes` WHERE " "`url`=?",
+            "SELECT `hash`, `old_text` FROM `sms_hashes` WHERE `url`=?",
             (page["url"],),
         )
         res = cur.fetchone()
