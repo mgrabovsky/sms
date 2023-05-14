@@ -93,7 +93,7 @@ def main() -> None:
         db.commit()
 
         # Compile and send the message
-        oldlines = "" if res[1] is None else res[1].splitlines()
+        oldlines = [b""] if res[1] is None else res[1].splitlines()
         newlines = contents.splitlines()
 
         logger.debug("Page modified, sending notification...")
