@@ -33,7 +33,7 @@ jobs:
       run: pyright
 
     - name: Lint with flake8
-      run: flake8 --config=setup.cfg --count --show-source --statistics .
+      run: flake8 --count --show-source --statistics .
 
     - name: Lint with Pylint
       run: pylint --rcfile=pylintrc *.py
