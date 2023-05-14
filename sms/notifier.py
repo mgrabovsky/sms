@@ -60,10 +60,11 @@ def notify(config: Dict[str, Any], diff: Iterator[bytes], page: Dict[str, Any]) 
     Trigger a notification that the given page has changed, including
     the specified diff between versions.
     """
-    from_addr = config["from"]
-    to_addr = config["to"]
-    msg_subject = config["subject"]
-    msg_body = config["body"]
+    email_config = config["notifiers"]["email"]
+    from_addr = email_config["from"]
+    to_addr = email_config["to"]
+    msg_subject = email_config["subject"]
+    msg_body = email_config["body"]
 
     subject = msg_subject.format(page)
     body = msg_body.format(page)

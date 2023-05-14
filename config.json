@@ -1,8 +1,12 @@
 {
-	"from": "Skynet Messaging System <sms@example.com>",
-	"to": "Yours Truly <yours.truly@example.com>",
-	"subject": "Page {0[label]} has changed",
-	"body": "Hey!\n\nI'm just letting you know that the {0[label]} page has changed recently.\nYou can view the latest version here: {0[url]}\n\nYours,\nS.M.S.",
+    "notifiers": {
+        "email": {
+            "from": "Skynet Messaging System <sms@example.com>",
+            "to": "Yours Truly <yours.truly@example.com>",
+            "subject": "Page {0[label]} has changed",
+            "body": "Hey!\n\nI'm just letting you know that the {0[label]} page has changed recently.\nYou can view the latest version here: {0[url]}\n\nYours,\nS.M.S."
+        }
+    },
 	"pages": [
 		{
 			"label": "GitHub",
