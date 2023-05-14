@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-import difflib
 import hashlib
 import json
 import urllib.request
 from email.header import Header
 from email.mime.text import MIMEText
 from smtplib import SMTP
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any
 
 
 def is_modified(blob: bytes, checksum: str) -> bool:
@@ -15,13 +14,6 @@ def is_modified(blob: bytes, checksum: str) -> bool:
     the hash was generated.
     """
     return generate_hash(blob) != checksum
-
-
-def diff_bytes(old: List[bytes], new: List[bytes]) -> Iterator[bytes]:
-    """
-    Create a diff of two byte strings.
-    """
-    return difflib.diff_bytes(difflib.unified_diff, old, new, b"before", b"after")
 
 
 def fetch_page(url: str) -> bytes:
@@ -42,7 +34,7 @@ def generate_hash(blob: bytes) -> str:
     return h.hexdigest()
 
 
-def load_configuration(config_file: str) -> Optional[Dict[str, Any]]:
+def load_configuration(config_file: str) -> dict[str, Any] | None:
     """
     Load configuration settings from the given file.
     """
@@ -55,7 +47,7 @@ def load_configuration(config_file: str) -> Optional[Dict[str, Any]]:
     return config
 
 
-def notify(config: Dict[str, Any], diff: Iterator[bytes], page: Dict[str, Any]) -> None:
+def notify(config: dict[str, Any], message: str, page: dict[str, Any]) -> None:
     """
     Trigger a notification that the given page has changed, including
     the specified diff between versions.
@@ -68,8 +60,7 @@ def notify(config: Dict[str, Any], diff: Iterator[bytes], page: Dict[str, Any]) 
 
     subject = msg_subject.format(page)
     body = msg_body.format(page)
-    body += "\n\n"
-    body += b"\n".join(diff).decode("utf-8")
+    body += f"\n\n{message}"
 
     send_mail(from_addr, to_addr, subject, body)
 

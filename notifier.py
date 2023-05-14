@@ -5,8 +5,8 @@ import sys
 import time
 from urllib.error import URLError
 
+from sms.comparator import LinesDiffComparator
 from sms.notifier import (
-    diff_bytes,
     fetch_page,
     generate_hash,
     is_modified,
@@ -49,6 +49,7 @@ def main() -> None:
     logger = logging.getLogger()
 
     db = sqlite3.connect("sms.db")
+    comparator = LinesDiffComparator()
 
     for page in watched_pages:
         logger.info("Downloading %s ...", page["url"])
@@ -62,17 +63,16 @@ def main() -> None:
 
         cur = db.cursor()
         cur.execute(
-            "SELECT `hash`, `old_text` FROM `sms_hashes` WHERE `url`=?",
+            "SELECT `hash`, `old_text` FROM `sms_hashes` WHERE `url` = ?",
             (page["url"],),
         )
-        res = cur.fetchone()
+        previous_row = cur.fetchone()
 
         # Create a record for the page if it hasn't been scraped yet
-        if not res or not res[0]:
+        if not previous_row or not previous_row[0]:
             logger.debug("New page, saving...")
             cur.execute(
-                "INSERT INTO `sms_hashes` (`url`, `hash`, "
-                "`old_text`) VALUES(?, ?, ?)",
+                "INSERT INTO `sms_hashes` (`url`, `hash`, `old_text`) VALUES(?, ?, ?)",
                 (page["url"], new_hash, contents),
             )
             db.commit()
@@ -80,7 +80,7 @@ def main() -> None:
             continue
 
         # Check if the page has changed
-        old_hash = res[0]
+        old_hash = previous_row[0]
         if is_modified(contents, old_hash):
             logger.info("Page not modified")
             continue
@@ -93,11 +93,16 @@ def main() -> None:
         db.commit()
 
         # Compile and send the message
-        oldlines = [b""] if res[1] is None else res[1].splitlines()
-        newlines = contents.splitlines()
+        old_text = b"" if previous_row[1] is None else previous_row[1]
 
-        logger.debug("Page modified, sending notification...")
-        notify(config, diff_bytes(oldlines, newlines), page)
+        logger.debug("Page modified, computing diff...")
+        diff_lines = comparator.compare(old_text, contents)
+        if diff_lines is None:
+            logger.info("Diff is empty. Skipping")
+            continue
+
+        email_body = b"\n".join(diff_lines).decode("utf-8")
+        notify(config, email_body, page)
 
         logger.debug("Notification sent")
         time.sleep(0.5)
